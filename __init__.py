@@ -1,6 +1,8 @@
 from flask import Flask, redirect
-
+import csv
+import json
 import random
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -14,9 +16,38 @@ Implement an endpoint `/api/fetch` that returns the contents of `data.csv` as JS
 2) Save each entry's full name, time zone, and department
 3) Return the JSON data at the endpoint
 
+
+    employees: [
+        {
+            name: <full name of employee>,
+            timezone: <timezone of employee>,
+            dept: <department of employee>
+        }
+
 """
 
+
 # your work here
+@app.route("/api/fetch")
+def fetch_data():
+    # data = {'employees': ['name', 'timezone', 'dept']}
+    data = {}
+    with open("data.csv") as csvFile:
+        csvReader = csv.DictReader(csvFile)
+        list = []
+        for rows in csvReader:
+            emp_details = {"name": None, "timezone": None, "dept": None}
+            emp_details['name'] = rows['first_name'] + ' ' + rows['last_name']
+            emp_details['timezone'] = rows['time_zone']
+            emp_details['dept'] = rows['dept']
+            list.append(emp_details)
+
+    data['employees'] = list
+    #print(data)   no pretty print
+    #print(json.dumps(data, indent=1)) pretty print
+
+    return json.dumps(data, indent=1)
+
 
 """
 
@@ -28,6 +59,7 @@ DOCUMENTATION WEBPAGE BELOW
 @app.route("/")
 def redirect_to_api():
     return redirect("/api", code=301)
+
 
 @app.route("/api")
 def api_home():
